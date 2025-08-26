@@ -1,0 +1,11 @@
+---
+- name: Instalar pacotes básicos
+  hosts: node_servers
+  become: true
+  tags: ['packages']
+  tasks:
+    - name: Garantir pacotes instalados
+      package:
+        name: "{{ common_packages }}"
+        state: present
+

@@ -1,0 +1,34 @@
+---
+- name: Copiar arquivo e validar serviço
+  hosts: node_servers
+  become: true
+  tags: ['files','service']
+  vars:
+    svc_name: crond
+  tasks:
+    - name: Garantir diretório /etc/motd.d
+      file:
+        path: /etc/motd.d
+        state: directory
+        mode: '0755'
+
+    - name: Enviar MOTD do lab
+      copy:
+        src: ../files/motd
+        dest: /etc/motd.d/00-lab
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reiniciar {{ svc_name }} apenas se mudou algo
+      service:
+        name: "{{ svc_name }}"
+        state: restarted
+      when: ansible_facts['os_family'] == 'RedHat'
+      notify: show-status
+
+  handlers:
+    - name: show-status
+      command: systemctl --no-pager status {{ svc_name }}
+      changed_when: false
+

@@ -1,0 +1,13 @@
+---
+common_packages:
+  - vim-enhanced
+  - git
+  - curl
+  - htop
+
+devops_user: vitor
+devops_user_shell: /bin/bash
+
+motd_text: |
+  Bem-vindo ao LAB AWX/Ansible 🚀
+  Ambiente gerenciado por Ansible.

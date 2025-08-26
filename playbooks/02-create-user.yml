@@ -1,0 +1,27 @@
+---
+- name: Criar usuário DevOps
+  hosts: node_servers
+  become: true
+  tags: ['user']
+  tasks:
+    - name: Garantir grupo 'wheel' existe (sudoers)
+      group:
+        name: wheel
+        state: present
+
+    - name: Criar usuário {{ devops_user }}
+      user:
+        name: "{{ devops_user }}"
+        shell: "{{ devops_user_shell }}"
+        groups: wheel
+        append: true
+        state: present
+
+    - name: Permitir wheel sem senha (apenas no lab)
+      lineinfile:
+        path: /etc/sudoers
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        state: present
+        validate: 'visudo -cf %s'
+
