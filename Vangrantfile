@@ -1,0 +1,46 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/rocky8"
+  config.vm.boot_timeout = 900
+  config.ssh.username = "vagrant"
+  config.ssh.insert_key = false
+
+  # CONTROL
+  config.vm.define "control" do |m|
+    m.vm.hostname = "control"
+    m.vm.network "private_network", ip: "192.168.56.10"
+    m.vm.provider "virtualbox" do |vb|
+      vb.name = "lab-awx-control"
+      vb.memory = 2048
+      vb.cpus  = 2
+      vb.gui   = false   # se travar, mude para true para ver o boot
+    end
+    m.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+  end
+
+  config.vm.define "control" do |m|
+  # ... (resto igual)
+  m.vm.provision "file",
+    source: File.expand_path("~/.vagrant.d/insecure_private_key"),
+    destination: "/home/vagrant/.ssh/vagrant_insecure_key"
+
+  m.vm.provision "shell", inline: <<-SHELL
+    chown vagrant:vagrant /home/vagrant/.ssh/vagrant_insecure_key
+    chmod 600 /home/vagrant/.ssh/vagrant_insecure_key
+  SHELL
+  end
+
+  # NODES
+  ["node1","node2"].each_with_index do |name, idx|
+    config.vm.define name do |m|
+      m.vm.hostname = name
+      m.vm.network "private_network", ip: "192.168.56.#{11+idx}"
+      m.vm.provider "virtualbox" do |vb|
+        vb.name   = "lab-awx-#{name}"
+        vb.memory = 1536
+        vb.cpus   = 1
+        vb.gui    = false
+      end
+    end
+  end
+end
+
